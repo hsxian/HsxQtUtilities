@@ -15,11 +15,8 @@ namespace hsx
     {
     public:
         FileCache();
-        void setCacheDir(const QString &dir);
-        void cleanOutTimeFiles(const std::function<QDateTime(const QFileInfo &)> &checkoutFunc, const QDateTime &currentTime, uint timeoutSecs);
-        void get(const QString &filename, const std::function<void(QByteArray &)> &pullProxywhenNotFileCache, std::function<bool(QByteArray &)> &canCache, QByteArray &ret);
-    private:
-        QString m_Dir;
+        void cleanOutTimeFiles(const QString &dir, const std::function<QDateTime(const QFileInfo &)> &checkoutFunc, const QDateTime &currentTime, uint timeoutSecs);
+        bool get(const QString &file, const std::function<void(QByteArray &)> &pullProxywhenNotFileCache, const std::function<bool(QByteArray &)> &canCacheFunc, QByteArray &ret);
     };
 }
 #endif // FILECACHE_H

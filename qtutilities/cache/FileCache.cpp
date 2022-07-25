@@ -5,18 +5,12 @@
 using namespace hsx;
 FileCache::FileCache()
 {
-
 }
 
-void FileCache::setCacheDir(const QString &dir)
-{
-    m_Dir = dir;
-    IoHelper::instance()->mkDirWhenNotExist(dir);
-}
 
-void FileCache::cleanOutTimeFiles(const std::function<QDateTime(const QFileInfo &)> &checkoutFunc, const QDateTime &currentTime, uint timeoutSecs)
+void FileCache::cleanOutTimeFiles(const QString &dir, const std::function<QDateTime(const QFileInfo &)> &checkoutFunc, const QDateTime &currentTime, uint timeoutSecs)
 {
-    auto fs = IoHelper::instance()->findFiles(m_Dir, QStringList());
+    auto fs = IoHelper::instance()->findFiles(dir, QStringList());
     foreach(auto f, fs)
     {
         QFileInfo fi(f);
@@ -28,23 +22,22 @@ void FileCache::cleanOutTimeFiles(const std::function<QDateTime(const QFileInfo 
             qf.remove();
         }
     }
-
 }
 
-void FileCache::get(const QString &filename,
-                    const std::function<void (QByteArray &)> &pullProxywhenNotFileCache,
-                    std::function<bool (QByteArray &)> &canCache,
+bool FileCache::get(const QString &file,
+                    const std::function<void(QByteArray &)> &pullProxywhenNotFileCache,
+                    const std::function<bool(QByteArray &)> &canCacheFunc,
                     QByteArray &ret)
 {
-    QDir qdir(m_Dir);
-    auto fn = qdir.absoluteFilePath(filename);
-    if(IoHelper::instance()->readAllFrom(fn, ret))
+    if(IoHelper::instance()->readAllFrom(file, ret))
     {
-        return;
+        return true;
     }
     pullProxywhenNotFileCache(ret);
-    if(canCache(ret))
+    if(canCacheFunc(ret))
     {
-        IoHelper::instance()->writeAllTo(fn, ret);
+        IoHelper::instance()->writeAllTo(file, ret);
+        return true;
     }
+    return false;
 }

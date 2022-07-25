@@ -18,6 +18,12 @@ SOURCES += thread/ThreadHelper.cpp \
     extension/StringEx.cpp \
     extension/TimeSpan.cpp \
     geometry/LineStegment.cpp \
+    git/CommitInfo.cpp \
+    git/GitHelper.cpp \
+    git/GitTransferProgress.cpp \
+    git/GitTypes.cpp \
+    git/OId.cpp \
+    humanization/HumanizationBytes.cpp \
     io/IoHelper.cpp \
     linq/CollectionHelper.cpp \
     math/UnitConversion.cpp \
@@ -35,6 +41,12 @@ HEADERS += cache/SlideWindowCache.h \
         extension/StringEx.h \
         extension/TimeSpan.h \
         geometry/LineStegment.h \
+        git/CommitInfo.h \
+        git/GitHelper.h \
+        git/GitTransferProgress.h \
+        git/GitTypes.h \
+        git/OId.h \
+        humanization/HumanizationBytes.h \
         io/IoHelper.h \
         linq/CollectionHelper.h \
         math/UnitConversion.h \
@@ -52,3 +64,9 @@ unix {
     target.path = /usr/lib
     INSTALLS += target
 }
+
+INCLUDEPATH += $$PWD/../dependencies/libgit2/include \
+
+
+
+
