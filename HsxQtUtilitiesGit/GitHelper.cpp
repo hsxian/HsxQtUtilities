@@ -86,7 +86,10 @@ int sidebandProgressCallback(const char *str, int len, void *payload)
 
 void GitHelper::getBranchs(QStringList &ret, GitTypes::BranchType btype)
 {
-    if(!g_repo) { return; }
+    if(!g_repo)
+    {
+        return;
+    }
     int error;
     git_reference *ref = NULL;
     git_branch_t btype2;
@@ -104,7 +107,10 @@ void GitHelper::getBranchs(QStringList &ret, GitTypes::BranchType btype)
 
 void GitHelper::getOids(QList<OId> &ret, GitTypes::SortType sort, const QString &refname)
 {
-    if(!g_repo) { return; }
+    if(!g_repo)
+    {
+        return;
+    }
     git_revwalk *walk;
     git_oid id;
     int error;
@@ -175,7 +181,10 @@ void check_error()
 
 int GitHelper::merge(GitTypes::CheckoutStrategyType checkout_strategy, const char *remoteName, const char *branchName)
 {
-    if(!g_repo) { return GIT_ENOTFOUND; }
+    if(!g_repo)
+    {
+        return GIT_ENOTFOUND;
+    }
 
     int err = GIT_OK;
     int autocommit = 1;
@@ -204,7 +213,9 @@ int GitHelper::merge(GitTypes::CheckoutStrategyType checkout_strategy, const cha
         if(err == GIT_ENOTFOUND)
         {
             if((err = git_branch_lookup(&commit_ref, g_repo, commit_str, GIT_BRANCH_REMOTE)))
-            { goto out; }
+            {
+                goto out;
+            }
         }
         else
         {
@@ -212,10 +223,14 @@ int GitHelper::merge(GitTypes::CheckoutStrategyType checkout_strategy, const cha
         }
     }
     if((err = git_annotated_commit_from_ref(&commit_merge_head, g_repo, commit_ref)))
-    { goto out; }
+    {
+        goto out;
+    }
 
     if((err = git_merge_analysis(&analysis, &preference, g_repo, (const git_annotated_commit **)&commit_merge_head, 1)))
-    { goto out; }
+    {
+        goto out;
+    }
 
     if(analysis & GIT_MERGE_ANALYSIS_UP_TO_DATE)
     {
@@ -230,28 +245,42 @@ int GitHelper::merge(GitTypes::CheckoutStrategyType checkout_strategy, const cha
     {
 
         if((err = git_reference_peel(&commit_obj, commit_ref, GIT_OBJ_COMMIT)))
-        { goto out; }
+        {
+            goto out;
+        }
 
         if((err = git_repository_head(&head_ref, g_repo)))
-        { goto out; }
+        {
+            goto out;
+        }
 
         if((err = git_commit_tree(&commit_tree_obj, (git_commit *)commit_obj)))
-        { goto out; }
+        {
+            goto out;
+        }
 
         if((err = git_checkout_tree(g_repo, (git_object *)commit_tree_obj, &checkout_options)))
-        { goto out; }
+        {
+            goto out;
+        }
 
         if((err = git_reference_set_target(&new_ref, head_ref, git_commit_id((git_commit *)commit_obj), NULL)))
-        { goto out; }
+        {
+            goto out;
+        }
 
         goto out;
     }
 
     if((err = git_merge(g_repo, (const git_annotated_commit **)&commit_merge_head, 1, &merge_options, &checkout_options)))
-    { goto out; }
+    {
+        goto out;
+    }
 
     if((err = git_repository_index(&index, g_repo)))
-    { goto out; }
+    {
+        goto out;
+    }
 
     if(!git_index_has_conflicts(index))
     {
@@ -273,13 +302,34 @@ int GitHelper::merge(GitTypes::CheckoutStrategyType checkout_strategy, const cha
 out:
     check_error();
 
-    if(index) { git_index_free(index); }
-    if(commit_merge_head) { git_annotated_commit_free(commit_merge_head); }
-    if(commit_obj) { git_object_free(commit_obj); }
-    if(commit_ref) { git_reference_free(commit_ref); }
-    if(head_ref) { git_reference_free(head_ref); }
-    if(commit_tree_obj) { git_tree_free(commit_tree_obj); }
-    if(new_ref) { git_reference_free(new_ref); }
+    if(index)
+    {
+        git_index_free(index);
+    }
+    if(commit_merge_head)
+    {
+        git_annotated_commit_free(commit_merge_head);
+    }
+    if(commit_obj)
+    {
+        git_object_free(commit_obj);
+    }
+    if(commit_ref)
+    {
+        git_reference_free(commit_ref);
+    }
+    if(head_ref)
+    {
+        git_reference_free(head_ref);
+    }
+    if(commit_tree_obj)
+    {
+        git_tree_free(commit_tree_obj);
+    }
+    if(new_ref)
+    {
+        git_reference_free(new_ref);
+    }
 
     return err;
 }
@@ -289,7 +339,9 @@ int mergehead_peel_cb(const git_oid *oid, void *payload)
     struct mergehead_peel_payload *peel_payload = (struct mergehead_peel_payload *)payload;
 
     if((err = git_commit_lookup(peel_payload->next_parent, peel_payload->repo, oid)))
-    { return -1; }
+    {
+        return -1;
+    }
     peel_payload->next_parent++;
     return 0;
 }
@@ -314,22 +366,32 @@ int sgit_get_author_signature(git_repository *repo, git_signature **author_signa
 
     err = git_signature_default(author_signature, repo);
     if(err == 0)
-    { return 0; }
+    {
+        return 0;
+    }
     if(err != GIT_ENOTFOUND)
-    { return err; }
+    {
+        return err;
+    }
 
     author_name = getenv(GIT_AUTHOR_NAME_ENVIRONMENT);
     author_email = getenv(GIT_AUTHOR_EMAIL_ENVIRONMENT);
     author_date = getenv(GIT_AUTHOR_DATE_ENVIRONMENT);
 
     if(!author_name || !author_email)
-    { fprintf(stderr, "Author information not properly configured!\n"); }
+    {
+        fprintf(stderr, "Author information not properly configured!\n");
+    }
 
     if(!author_name)
-    { author_name = "hsx"; }
+    {
+        author_name = "hsx";
+    }
 
     if(!author_email)
-    { author_email = "hsxhsx@qq.com"; }
+    {
+        author_email = "hsxhsx@qq.com";
+    }
 
     /*if(author_date)
     {
@@ -360,16 +422,22 @@ int sgit_get_committer_signature(git_repository *repo, git_signature **committer
 
     err = git_signature_default(committer_signature, repo);
     if(err == 0)
-    { return 0; }
+    {
+        return 0;
+    }
     if(err != GIT_ENOTFOUND)
-    { return err; }
+    {
+        return err;
+    }
 
     committer_name = getenv(GIT_COMMITTER_NAME_ENVIRONMENT);
     committer_email = getenv(GIT_COMMITTER_EMAIL_ENVIRONMENT);
     committer_date = getenv(GIT_COMMITTER_DATE_ENVIRONMENT);
 
     if(!committer_name || !committer_email)
-    { fprintf(stderr, "Committer information not properly configured!\n"); }
+    {
+        fprintf(stderr, "Committer information not properly configured!\n");
+    }
 
     /*if(committer_date)
     {
@@ -414,11 +482,15 @@ int GitHelper::commit(char *committer_name, char *committer_email)
 
     /* Count the number of parents */
     if((git_repository_head(&head, g_repo)) == GIT_OK)
-    { num_parents++; }
+    {
+        num_parents++;
+    }
 
     err = sgit_repository_mergeheads_count(&num_parents, g_repo);
     if(err && err != GIT_ENOTFOUND)
-    { goto out; }
+    {
+        goto out;
+    }
 
     /* Now determine the actual parents */
     if(num_parents)
@@ -430,7 +502,9 @@ int GitHelper::commit(char *committer_name, char *committer_email)
         }
 
         if((err = git_reference_peel((git_object **)&parent, head, GIT_OBJ_COMMIT)))
-        { goto out; }
+        {
+            goto out;
+        }
         parents[0] = parent;
 
         if(num_parents > 1)
@@ -442,60 +516,106 @@ int GitHelper::commit(char *committer_name, char *committer_email)
             peel_payload.next_parent = parents + 1;
 
             if((err = git_repository_mergehead_foreach(g_repo, mergehead_peel_cb, &peel_payload)))
-            { goto out; }
+            {
+                goto out;
+            }
         }
     }
 
     if((err = sgit_get_author_signature(g_repo, &author_signature)) != GIT_OK)
-    { goto out; }
+    {
+        goto out;
+    }
 
     if((err = sgit_get_committer_signature(g_repo, &committer_signature, committer_name, committer_email)) != GIT_OK)
-    { goto out; }
+    {
+        goto out;
+    }
 
     /* Write index as tree */
     if((err = git_repository_index(&idx, g_repo)) != GIT_OK)
-    { goto out; }
+    {
+        goto out;
+    }
     if(git_index_entrycount(idx) == 0)
     {
         fprintf(stderr, "Nothing to commit!\n");
         goto out;
     }
     if((err = git_index_write_tree_to(&tree_oid, idx, g_repo)) != GIT_OK)
-    { goto out; }
+    {
+        goto out;
+    }
     if((err = git_tree_lookup(&tree, g_repo, &tree_oid)) != GIT_OK)
-    { goto out; }
+    {
+        goto out;
+    }
 
     /* Write tree as commit */
     if((err = git_commit_create(&commit_oid, g_repo, "HEAD", author_signature, committer_signature,
-                                NULL, message, tree, num_parents, (const git_commit **)parents)) != GIT_OK)
-    { goto out; }
+                                NULL, message, tree, num_parents, ( git_commit * const *)parents)) != GIT_OK)
+    {
+        goto out;
+    }
 
     rc = EXIT_SUCCESS;
 out:
     check_error();
-    if(head) { git_reference_free(head); }
-    if(tree) { git_tree_free(tree); }
-    if(idx) { git_index_free(idx); }
+    if(head)
+    {
+        git_reference_free(head);
+    }
+    if(tree)
+    {
+        git_tree_free(tree);
+    }
+    if(idx)
+    {
+        git_index_free(idx);
+    }
     if(parents)
     {
         for(i = 0; i < num_parents; i++)
-        { git_commit_free(parents[i]); }
+        {
+            git_commit_free(parents[i]);
+        }
         free(parents);
     }
-    if(author_signature) { git_signature_free(author_signature); }
-    if(committer_signature) { git_signature_free(committer_signature); }
-    if(commit) { git_commit_free(commit); }
-    if(branch) { git_reference_free(branch); }
+    if(author_signature)
+    {
+        git_signature_free(author_signature);
+    }
+    if(committer_signature)
+    {
+        git_signature_free(committer_signature);
+    }
+    if(commit)
+    {
+        git_commit_free(commit);
+    }
+    if(branch)
+    {
+        git_reference_free(branch);
+    }
     return rc;
 }
 int GitHelper::pull(GitTypes::CheckoutStrategyType checkout_strategy, const char *remoteName, const char *branchName)
 {
-    if(!g_repo) { return GIT_ENOTFOUND; }
+    if(!g_repo)
+    {
+        return GIT_ENOTFOUND;
+    }
 
     auto er = featch(remoteName);
-    if(er) { return er; }
+    if(er)
+    {
+        return er;
+    }
     er = merge(checkout_strategy, remoteName, branchName);
-    if(er) { return er; }
+    if(er)
+    {
+        return er;
+    }
     return er;
 }
 
@@ -525,7 +645,10 @@ const QString GitHelper::toReferenceFriendlyName(const QString &fullname)
 }
 void GitHelper::getReferences(QStringList &ret, const char *remoteName)
 {
-    if(!remoteName) { return; }
+    if(!remoteName)
+    {
+        return;
+    }
     git_strarray list;
     git_remote *remote;
     git_remote_lookup(&remote, g_repo, remoteName);
@@ -540,7 +663,10 @@ void GitHelper::getReferences(QStringList &ret, const char *remoteName)
 }
 void GitHelper::getRemotes(QStringList &ret)
 {
-    if(!g_repo) { return; }
+    if(!g_repo)
+    {
+        return;
+    }
     git_strarray list;
     git_remote_list(&list, g_repo);
     for(size_t i = 0; i < list.count; i++)
@@ -552,7 +678,10 @@ void GitHelper::getRemotes(QStringList &ret)
 }
 void GitHelper::test()
 {
-    if(!g_repo) { return; }
+    if(!g_repo)
+    {
+        return;
+    }
     QStringList remotes;
     getRemotes(remotes);
     foreach(auto name, remotes)
@@ -604,7 +733,10 @@ void GitHelper::test()
 
 int GitHelper::checkout(GitTypes::CheckoutStrategyType strategy, const QStringList &paths)
 {
-    if(!g_repo) { return GIT_ENOTFOUND; }
+    if(!g_repo)
+    {
+        return GIT_ENOTFOUND;
+    }
     git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
     opts.checkout_strategy = strategy;
     git_strarray git_paths = {0};
@@ -625,7 +757,10 @@ int GitHelper::checkout(GitTypes::CheckoutStrategyType strategy, const QStringLi
 }
 int GitHelper::featch(const char *remoteName)
 {
-    if(!g_repo) { return GIT_ENOTFOUND; }
+    if(!g_repo)
+    {
+        return GIT_ENOTFOUND;
+    }
 
     git_remote *remote = NULL;
 

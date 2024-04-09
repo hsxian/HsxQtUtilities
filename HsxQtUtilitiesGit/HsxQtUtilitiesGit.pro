@@ -34,3 +34,8 @@ unix {
     target.path = /usr/lib
 }
 !isEmpty(target.path): INSTALLS += target
+
+unix|win32: LIBS += -L$$PWD/dependencies/libgit2/build/ -lgit2
+
+INCLUDEPATH += $$PWD/dependencies/libgit2/include
+DEPENDPATH += $$PWD/dependencies/libgit2/include
