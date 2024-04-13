@@ -2,19 +2,9 @@
 #include <QEventLoop>
 #include <QTimer>
 #include <qdatetime.h>
+#include <thread>
 
 using namespace hsx;
-
-ThreadHelper *ThreadHelper::_instance = 0;
-ThreadHelper *ThreadHelper::instance()
-{
-    if(!_instance)
-    {
-        _instance = new ThreadHelper();
-    }
-    return _instance;
-}
-
 void ThreadHelper::delay(int msce)
 {
     QEventLoop loop;
@@ -34,7 +24,16 @@ void ThreadHelper::waitOn(const std::function<bool()> &pFunc, int msecsTimecheck
         delay(msecsTimecheck);
     }
 }
-
-ThreadHelper::ThreadHelper()
+void ThreadHelper::waitOn4std(const std::function<bool ()> &pFunc, int msecsTimecheck, int msecsTimeout)
 {
+    auto now = QDateTime::currentDateTime().toMSecsSinceEpoch();
+    while(pFunc())
+    {
+        if(QDateTime::currentDateTime().toMSecsSinceEpoch() - now > msecsTimeout)
+        {
+            qDebug() << __FUNCTION__ << "wait time out " << msecsTimecheck << msecsTimeout;
+            break;
+        }
+        std::this_thread::sleep_for(std::chrono::microseconds(msecsTimecheck));
+    }
 }

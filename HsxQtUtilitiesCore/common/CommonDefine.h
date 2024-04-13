@@ -2,6 +2,13 @@
 #define COMMONDEFINE_H
 
 #include <QString>
+/**
+ * @brief 一些通用定义
+ */
+const auto TIME_FORMAT = QString::fromLatin1("yyyy-MM-dd HH:mm:ss");
+const auto TIME_FORMAT_WITHMSEC = QString::fromLatin1("yyyy-MM-dd HH:mm:ss.zzz");
+const auto TRUE_STRING = QString::fromLatin1("true");
+const auto FLASE_STRING = QString::fromLatin1("false");
 
 #define copyOther(name)\
     name  = other.name
