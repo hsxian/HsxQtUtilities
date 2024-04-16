@@ -1,5 +1,5 @@
 QT -= gui
-QT += widgets network
+QT += widgets network sql
 TEMPLATE = lib
 DEFINES += HSXQTUTILITIESCORE_LIBRARY
 
@@ -16,6 +16,7 @@ SOURCES += \
     algorithm/HsxKMeans.cpp \
     algorithm/Kalman.cpp \
     cache/AsyncMapCache.cpp \
+    data/QSqliteHelper.cpp \
     system/HsxNativeEvent.cpp \
     thread/ThreadHelper.cpp \
     cache/FileCache.cpp \
@@ -50,6 +51,7 @@ HEADERS += \
     cache/SlideWindowCache.h \
     cache/FileCache.h \
     common/CommonDefine.h \
+    data/QSqliteHelper.h \
     extension/StringEx.h \
     extension/TimeSpan.h \
     geometry/LineStegment.h \
