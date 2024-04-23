@@ -12,10 +12,39 @@ OBJECTS_DIR=temp/obj
 DEFINES += \
 BUILD_WITH_GIT \
 BUILD_WITH_GIS \
-BUILD_WITH_KAFKA
+BUILD_WITH_KAFKA \
+BUILD_WITH_RABBITMQ
+
+#defineReplace(remove_extra_config_parameter) {
+#    configs = $$1
+#    debug_and_release_params = # 匹配预选队列
+#    keys = debug Debug release Release debug_and_release
+#    for (iter, configs) {
+#        contains(keys, $$iter) {
+#            debug_and_release_params += $$iter
+#        }
+#    }
+
+#    for (iter, debug_and_release_params) {
+#        configs -= $$iter # 移除预选队列的属性
+#    }
+
+#    configs += $$last(debug_and_release_params) # 添加(保留)预选队列的最后属性
+
+#    return($$configs)
+#}
+
+## 使用
+#CONFIG = $$remove_extra_config_parameter($$CONFIG)
+
+
+CONFIG(debug,debug|release):BUILD_TYPE=debug
+else:CONFIG(release,debug|release):BUILD_TYPE=release
+
 
 #DEPENDENCIES_PATH=$$PWD/dependencies
 DEPENDENCIES_PATH=$$PWD/..
+
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
@@ -49,7 +78,8 @@ SOURCES += \
     src/ui/widgets/ImageWidget.cpp \
     src/ui/widgets/MuliSelCombox.cpp \
     src/ui/widgets/PaintEventWidget.cpp \
-    src/ui/widgets/QRoundProgressBar.cpp
+    src/ui/widgets/QRoundProgressBar.cpp \
+    src/extension/RegularHelper.cpp \
 
 HEADERS += \
     src/HsxQtUtilities_global.h \
@@ -84,7 +114,9 @@ HEADERS += \
     src/ui/widgets/ImageWidget.h \
     src/ui/widgets/MuliSelCombox.h \
     src/ui/widgets/PaintEventWidget.h \
-    src/ui/widgets/QRoundProgressBar.h
+    src/ui/widgets/QRoundProgressBar.h \
+    src/extension/RegularHelper.h \
+
 
 INCLUDEPATH += src/
 
@@ -92,8 +124,7 @@ contains(DEFINES,BUILD_WITH_GIT){
 
     INCLUDEPATH += $$DEPENDENCIES_PATH/libgit2/include
 
-    win32:CONFIG(release, debug|release): LIBS +=  -L$$DEPENDENCIES_PATH/libgit2/release/ -lgit2
-    else:win32:CONFIG(debug, debug|release): LIBS +=  -L$$DEPENDENCIES_PATH/libgit2/build/debug/ -lgit2
+    win32: LIBS +=  -L$$DEPENDENCIES_PATH/libgit2/build/$$BUILD_TYPE/ -lgit2
     else:unix: LIBS += -L$$DEPENDENCIES_PATH/libgit2/build/ -lgit2
 
     SOURCES += \
@@ -117,8 +148,7 @@ contains(DEFINES,BUILD_WITH_GIS){
                 += $$DEPENDENCIES_PATH/geos/build/include \
                 += $$DEPENDENCIES_PATH/gdal/gdal/gcore
 
-    win32:CONFIG(release, debug|release): LIBS +=  -L$$DEPENDENCIES_PATH/geos/build/lib/release/ -lgeos
-    else:win32:CONFIG(debug, debug|release): LIBS +=  -L$$DEPENDENCIES_PATH/geos/build/lib/debug/ -lgeos
+    win32: LIBS +=  -L$$DEPENDENCIES_PATH/geos/build/lib/$$BUILD_TYPE/ -lgeos
     else:unix: LIBS += -L$$DEPENDENCIES_PATH/geos/build/lib/ -lgeos
 
     SOURCES += \
@@ -132,19 +162,14 @@ contains(DEFINES,BUILD_WITH_KAFKA){
 
     INCLUDEPATH += $$DEPENDENCIES_PATH/librdkafka/src-cpp
 
-    win32:CONFIG(release, debug|release):{
-        LIBS +=  -L$$DEPENDENCIES_PATH/librdkafka/build/src/release/ -lrdkafka \
-                 -L$$DEPENDENCIES_PATH/librdkafka/build/src-cpp/release/ -lrdkafka++
-    }
-    else:win32:CONFIG(debug, debug|release):{
-        LIBS +=  -L$$DEPENDENCIES_PATH/librdkafka/build/src/debug/ -lrdkafka \
-                 -L$$DEPENDENCIES_PATH/librdkafka/build/src-cpp/debug/ -lrdkafka++
+    win32:{
+        LIBS +=  -L$$DEPENDENCIES_PATH/librdkafka/build/src/$$BUILD_TYPE/ -lrdkafka \
+                 -L$$DEPENDENCIES_PATH/librdkafka/build/src-cpp/$$BUILD_TYPE/ -lrdkafka++
     }
     else:unix:{
         LIBS += -L$$DEPENDENCIES_PATH/librdkafka/build/src -lrdkafka \
                 -L$$DEPENDENCIES_PATH/librdkafka/build/src-cpp -lrdkafka++
     }
-
 
     SOURCES += \
         src/mq/KafkaClient.cpp
@@ -152,6 +177,24 @@ contains(DEFINES,BUILD_WITH_KAFKA){
         src/mq/KafkaClient.h
 }
 
+
+contains(DEFINES,BUILD_WITH_RABBITMQ){
+
+    INCLUDEPATH += $$DEPENDENCIES_PATH/rabbitmq-c/include \
+                += $$DEPENDENCIES_PATH/rabbitmq-c/build/include
+
+    win32:{
+        LIBS +=  -L$$DEPENDENCIES_PATH/rabbitmq-c/build/librabbitmq/$$BUILD_TYPE/ -lrabbitmq.4
+    }
+    else:unix:{
+        LIBS += -L$$DEPENDENCIES_PATH/rabbitmq-c/build/librabbitmq -lrabbitmq.4
+    }
+
+    SOURCES += \
+        src/mq/RabbitMQ.cpp
+    HEADERS += \
+        src/mq/RabbitMQ.h
+}
 # Default rules for deployment.
 unix {
     target.path = /usr/lib
