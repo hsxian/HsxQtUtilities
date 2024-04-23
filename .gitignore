@@ -53,5 +53,7 @@ compile_commands.json
 # QtCreator local machine specific files for imported projects
 *creator.user*
 
-dependencies/
-dependencies/libgit2/
+dependencies
+temp
+[Dd]ebug
+[Rr]elease

@@ -1,7 +1,11 @@
 [submodule "libgit2"]
-	path = HsxQtUtilitiesGit/dependencies/libgit2
+	path = dependencies/libgit2
 	url = https://github.com/libgit2/libgit2.git
 	
 [submodule "geos"]
-	path = HsxQtUtilitiesGis/dependencies/geos
+	path = dependencies/geos
 	url = https://github.com/libgeos/geos.git
+
+[submodule "librdkafka"]
+	path = dependencies/librdkafka
+	url = https://github.com/edenhill/librdkafka.git
