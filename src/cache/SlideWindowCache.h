@@ -8,6 +8,7 @@
 #include <QList>
 #include <QMap>
 #include <thread/ThreadHelper.h>
+#include <algorithm>
 
 namespace hsx
 {
@@ -146,7 +147,7 @@ SlideWindowCache<TK, TV>::~SlideWindowCache()
     qDebug() << "enter release SlideWindowCache";
     stopAutoLoad();
 
-    while (m_Cache->size())
+    while(m_Cache->size())
     {
         auto ks = m_Cache->keys();
 
@@ -199,7 +200,8 @@ void SlideWindowCache<TK, TV>::tryGetValues(const TK &start, const TK &end, QLis
 template<class TK, class TV>
 void SlideWindowCache<TK, TV>::toUniformKey(const TK &k, TK &ret)
 {
-    auto c = (TK)(k / m_Config->step);
+    TK tmp = std::min(std::max(k, m_Config->start), m_Config->end);
+    auto c = (TK)(tmp / m_Config->step);
     ret = c * m_Config->step;
 }
 
@@ -209,10 +211,8 @@ void SlideWindowCache<TK, TV>::getUniformKeys(const TK &start, const TK &end, QL
     TK us, ue;
     toUniformKey(start, us);
     toUniformKey(end, ue);
-    auto s = us > m_Config->start ? us - m_Config->step : us;
-    auto e = ue < m_Config->end ? ue + m_Config->step : ue;
 
-    for(TK k = s; k <= e; k += m_Config->step)
+    for(TK k = us; k <= ue; k += m_Config->step)
     {
         ret.append(k);
     }

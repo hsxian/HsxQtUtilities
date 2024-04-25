@@ -1,41 +1,14 @@
-#include <QtTest>
-#include <QCoreApplication>
-
-// add necessary includes here
-#include <cache/SlideWindowCache.h>
+#include "SlideWinowCacheTest.h"
+#include <QTest>
 #include <thread/ThreadHelper.h>
-
-
-static int argc = 1;
-static char arg0[] = "";
-static char *argv[] = { arg0, nullptr };
-Q_GLOBAL_STATIC_WITH_ARGS(QCoreApplication, app, (argc, argv))
-
-class SlideWinowCacheTest : public QObject
-{
-    Q_OBJECT
-
-public:
-    SlideWinowCacheTest();
-    ~SlideWinowCacheTest();
-private:
-    hsx::SlideWindowCache<uint, QString> *m_Cache = nullptr;
-    hsx::SlideWindowConfig<uint, QString> *m_Config = nullptr;
-    hsx::StatusFlags m_Status;
-private slots:
-    void test_config();
-    void test_auto_load();
-    void test_value_get();
-    void test_uniform_key();
-
-};
 
 SlideWinowCacheTest::SlideWinowCacheTest()
 {
-    app->processEvents();
+    //    app->processEvents();
     m_Config = new hsx::SlideWindowConfig<uint, QString>();
     m_Cache = new  hsx::SlideWindowCache<uint, QString>(m_Config);
 }
+
 
 SlideWinowCacheTest::~SlideWinowCacheTest()
 {
@@ -98,15 +71,21 @@ void SlideWinowCacheTest::test_value_get()
 
 void SlideWinowCacheTest::test_uniform_key()
 {
-    uint k = 78;
     uint uk = 0;
-    m_Cache->toUniformKey(k, uk);
+    m_Cache->toUniformKey(78, uk);
     QVERIFY(uk == 75);
+
+    m_Cache->toUniformKey(1, uk);
+    QVERIFY(uk == 30);
+
+    m_Cache->toUniformKey(10000, uk);
+    QVERIFY(uk == 985);
 
     QList<uint>uks;
     m_Cache->getUniformKeys(13, 28, uks);
-    QVERIFY(uks.size() == 0);
+    QVERIFY(uks.size() == 1);
 
+    uks.clear();
     m_Cache->getUniformKeys(113, 128, uks);
     QVERIFY(uks.size() == 4);
 }
@@ -157,7 +136,3 @@ void SlideWinowCacheTest::test_auto_load()
     QVERIFY(count == m_Cache->size());
     QVERIFY(currentKey == m_Cache->getCurrentKey());
 }
-
-QTEST_APPLESS_MAIN(SlideWinowCacheTest)
-
-#include "tst_slidewinowcachetest.moc"

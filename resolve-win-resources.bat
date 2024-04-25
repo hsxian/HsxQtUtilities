@@ -15,3 +15,4 @@ xcopy /E /D /Y /I %DEPENDENCIES_PATH%\libgit2\build\%Targets%\*.dll %DESTDIR%
 xcopy /E /D /Y /I %DEPENDENCIES_PATH%\librdkafka\build\src\%Targets%\*.dll %DESTDIR%
 xcopy /E /D /Y /I %DEPENDENCIES_PATH%\librdkafka\build\src-cpp\%Targets%\*.dll %DESTDIR%
 xcopy /E /D /Y /I %DEPENDENCIES_PATH%\rabbitmq-c\build\librabbitmq\%Targets%\*.dll %DESTDIR%
+xcopy /E /D /Y /I %DEPENDENCIES_PATH%\opencv\build\bin\%Targets%\opencv*.dll %DESTDIR%

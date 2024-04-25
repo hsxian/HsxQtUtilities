@@ -13,12 +13,12 @@ DEFINES += \
 BUILD_WITH_GIT \
 BUILD_WITH_GIS \
 BUILD_WITH_KAFKA \
-BUILD_WITH_RABBITMQ
+BUILD_WITH_RABBITMQ \
+BUILD_WITH_OPENCV \
 
 #defineReplace(remove_extra_config_parameter) {
 #    configs = $$1
-#    debug_and_release_params = # 匹配预选队列
-#    keys = debug Debug release Release debug_and_release
+#    debug_and_release_params = # 匹配预选队�#    keys = debug Debug release Release debug_and_release
 #    for (iter, configs) {
 #        contains(keys, $$iter) {
 #            debug_and_release_params += $$iter
@@ -26,24 +26,28 @@ BUILD_WITH_RABBITMQ
 #    }
 
 #    for (iter, debug_and_release_params) {
-#        configs -= $$iter # 移除预选队列的属性
-#    }
+#        configs -= $$iter # 移除预选队列的属�#    }
 
-#    configs += $$last(debug_and_release_params) # 添加(保留)预选队列的最后属性
-
+#    configs += $$last(debug_and_release_params) # 添加(保留)预选队列的最后属�
 #    return($$configs)
 #}
 
 ## 使用
 #CONFIG = $$remove_extra_config_parameter($$CONFIG)
 
-
-CONFIG(debug,debug|release):BUILD_TYPE=debug
-else:CONFIG(release,debug|release):BUILD_TYPE=release
-
-
 #DEPENDENCIES_PATH=$$PWD/dependencies
 DEPENDENCIES_PATH=$$PWD/..
+
+CONFIG(debug,debug|release):{
+    BUILD_TYPE=debug
+}
+else:CONFIG(release,debug|release):{
+    BUILD_TYPE=release
+}
+win32:{
+    system(resolve-win-resources.bat debug $$DEPENDENCIES_PATH)
+}
+
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -195,6 +199,46 @@ contains(DEFINES,BUILD_WITH_RABBITMQ){
     HEADERS += \
         src/mq/RabbitMQ.h
 }
+
+contains(DEFINES,BUILD_WITH_OPENCV){
+
+    INCLUDEPATH += $$DEPENDENCIES_PATH/opencv/include \
+                += $$DEPENDENCIES_PATH/opencv/build \
+                += $$DEPENDENCIES_PATH/opencv/build/include/opencv2/core/hal \
+                += $$DEPENDENCIES_PATH/opencv/modules/core/include \
+                += $$DEPENDENCIES_PATH/opencv/modules/calib3d/include \
+                += $$DEPENDENCIES_PATH/opencv/modules/features2d/include \
+                += $$DEPENDENCIES_PATH/opencv/modules/flann/include \
+                += $$DEPENDENCIES_PATH/opencv/modules/dnn/include \
+                += $$DEPENDENCIES_PATH/opencv/modules/highgui/include \
+                += $$DEPENDENCIES_PATH/opencv/modules/imgcodecs/include \
+                += $$DEPENDENCIES_PATH/opencv/modules/videoio/include \
+                += $$DEPENDENCIES_PATH/opencv/modules/imgproc/include \
+                += $$DEPENDENCIES_PATH/opencv/modules/ml/include \
+                += $$DEPENDENCIES_PATH/opencv/modules/objdetect/include \
+                += $$DEPENDENCIES_PATH/opencv/modules/photo/include \
+                += $$DEPENDENCIES_PATH/opencv/modules/shape/include \
+                += $$DEPENDENCIES_PATH/opencv/modules/stitching/include \
+                += $$DEPENDENCIES_PATH/opencv/modules/superres/include \
+                += $$DEPENDENCIES_PATH/opencv/modules/video/include \
+                += $$DEPENDENCIES_PATH/opencv/modules/videostab/include \
+
+    win32:CONFIG(debug,debug|release):{
+        LIBS +=  -L$$DEPENDENCIES_PATH/opencv/build/lib/$$BUILD_TYPE/ -lopencv_core342d -lopencv_videoio342d -lopencv_imgcodecs342d
+    }
+    else:win32:CONFIG(release,debug|release):{
+        LIBS +=  -L$$DEPENDENCIES_PATH/opencv/build/lib/$$BUILD_TYPE/ -lopencv_core342 -lopencv_videoio342 -lopencv_imgcodecs342
+    }
+    else:unix:{
+        LIBS += -L$$DEPENDENCIES_PATH/opencv/build/lib -lopencv_core342 -lopencv_videoio342 -lopencv_imgcodecs342
+    }
+
+    SOURCES += \
+        src/media/OpencvHelper.cpp
+    HEADERS += \
+        src/media/OpencvHelper.h
+}
+
 # Default rules for deployment.
 unix {
     target.path = /usr/lib
